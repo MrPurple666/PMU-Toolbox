@@ -1,0 +1,8 @@
+.vs/
+**/bin/
+**/obj/
+login.cookies
+login.headers
+*.db
+*.db-shm
+*.db-wal

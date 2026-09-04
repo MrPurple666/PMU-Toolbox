@@ -1,0 +1,31 @@
+<Window
+    x:Class="ToolboxCorporativo.App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid x:Name="Raiz" Padding="32" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="Toolbox Corporativo" Style="{StaticResource HeaderTextBlockStyle}" />
+        <TextBlock Grid.Row="1" Text="Catálogo corporativo de recursos" />
+        <TextBox Grid.Row="2" Header="Pesquisar recursos" Text="{Binding Catalogo.TextoPesquisa, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,12,0,0" />
+        <TextBlock Grid.Row="3" Text="{Binding Onboarding.Status}" TextWrapping="Wrap" Margin="0,8,0,0" />
+        <TextBlock Grid.Row="4" Text="{Binding Catalogo.Mensagem}" TextWrapping="Wrap" Margin="0,4,0,8" />
+        <ListView Grid.Row="5" ItemsSource="{Binding Catalogo.RecursosVisiveis}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Padding="8,6">
+                        <TextBlock Text="{Binding Nome}" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Descricao}" Opacity="0.75" />
+                        <TextBlock Text="{Binding Destino}" Opacity="0.65" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Window>

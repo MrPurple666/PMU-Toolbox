@@ -1,0 +1,10 @@
+actor: WebTester
+extensions:
+  enabled:
+    - Codeception\Extension\RunProcess:
+        0: php -S 127.0.0.1:8091 -t public public/index.php
+        sleep: 3
+modules:
+  enabled:
+    - PhpBrowser:
+        url: http://127.0.0.1:8091
