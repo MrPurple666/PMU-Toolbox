@@ -9,6 +9,8 @@ public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) :
 {
     private readonly HashSet<Guid> favoritos = preferencias.LerFavoritos();
     private readonly List<Guid> recentes = [];
+    private readonly Dictionary<Guid, int> usos = [];
+    private readonly HashSet<Guid> ocultos = [];
     private IReadOnlyList<RegistroRecursoCache> recursos = [];
     private string textoPesquisa = string.Empty;
 
@@ -44,8 +46,15 @@ public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) :
             .Cast<RegistroRecursoCache>()
             .ToArray();
 
+    public IReadOnlyList<RegistroRecursoCache> MaisUtilizados =>
+        usos.OrderByDescending(par => par.Value)
+            .Select(par => Recursos.FirstOrDefault(recurso => recurso.Id == par.Key))
+            .Where(recurso => recurso is not null)
+            .Cast<RegistroRecursoCache>()
+            .ToArray();
+
     public IReadOnlyList<CategoriaCatalogo> Categorias =>
-        RecursosVisiveis
+        RecursosVisiveis.Where(recurso => !ocultos.Contains(recurso.Id))
             .OrderByDescending(recurso => EhFavorito(recurso.Id))
             .ThenBy(recurso => recurso.Nome, StringComparer.OrdinalIgnoreCase)
             .GroupBy(recurso => recurso.Tipo.ToString())
@@ -82,6 +91,17 @@ public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) :
 
     public bool EhFavorito(Guid recursoId) => favoritos.Contains(recursoId);
 
+    public bool AlternarOcultacao(RegistroRecursoCache recurso)
+    {
+        if (!recurso.Ocultavel)
+            return false;
+        if (!ocultos.Add(recurso.Id))
+            ocultos.Remove(recurso.Id);
+        OnPropertyChanged(nameof(RecursosVisiveis));
+        OnPropertyChanged(nameof(Categorias));
+        return ocultos.Contains(recurso.Id);
+    }
+
 
     public void RegistrarUso(Guid recursoId)
     {
@@ -89,7 +109,9 @@ public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) :
         recentes.Insert(0, recursoId);
         if (recentes.Count > 10)
             recentes.RemoveAt(recentes.Count - 1);
+        usos[recursoId] = usos.GetValueOrDefault(recursoId) + 1;
         OnPropertyChanged(nameof(Recentes));
+        OnPropertyChanged(nameof(MaisUtilizados));
     }
     public IReadOnlyList<RegistroRecursoCache> QuickLauncher(string texto, int limite = 10) =>
         Recursos.Where(recurso =>
