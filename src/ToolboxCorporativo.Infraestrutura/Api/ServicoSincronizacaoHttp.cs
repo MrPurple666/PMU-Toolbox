@@ -9,6 +9,7 @@ namespace ToolboxCorporativo.Infraestrutura.Api;
 
 public sealed partial class ServicoSincronizacaoHttp(
     HttpClient cliente,
+    ServicoConfiguracaoEndpoint configuracaoEndpoint,
     IServicoIdentidadeUsuario identidade,
     ContextoBancoDados banco,
     ILogger<ServicoSincronizacaoHttp> logger) : IServicoSincronizacao
@@ -26,7 +27,11 @@ public sealed partial class ServicoSincronizacaoHttp(
             new DadosUsuario(usuario.NomeUsuario, usuario.Dominio));
 
         cliente.Timeout = TimeSpan.FromSeconds(10);
-        using var resposta = await cliente.PostAsJsonAsync("api/v1/sincronizacao", requisicao, OpcoesJson, tokenCancelamento);
+        using var resposta = await cliente.PostAsJsonAsync(
+            new Uri(configuracaoEndpoint.Endereco, "api/v1/sincronizacao"),
+            requisicao,
+            OpcoesJson,
+            tokenCancelamento);
         if (resposta.StatusCode == System.Net.HttpStatusCode.NotModified)
             return;
         resposta.EnsureSuccessStatusCode();

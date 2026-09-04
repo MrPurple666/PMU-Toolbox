@@ -16,6 +16,7 @@ public sealed partial class ServicoInicializacaoCliente(
 {
     public event Action<SnapshotConfiguracao>? SnapshotAtualizado;
     public event Action<string>? StatusAtualizado;
+    public event Action<Exception?>? ErroAtualizado;
     public async Task<EstadoInicializacaoCliente> InicializarAsync(CancellationToken tokenCancelamento = default)
     {
         var snapshot = await banco.LerSnapshotAsync(tokenCancelamento);
@@ -23,6 +24,7 @@ public sealed partial class ServicoInicializacaoCliente(
         if (snapshot is not null)
             InformarSnapshotAtualizado(snapshot);
         _ = SincronizarEmSegundoPlanoAsync();
+        _ = SincronizarPeriodicamenteAsync();
         return new EstadoInicializacaoCliente(
             snapshot,
             ModoOffline: true,
@@ -30,20 +32,39 @@ public sealed partial class ServicoInicializacaoCliente(
     }
 
 
-    private async Task SincronizarEmSegundoPlanoAsync()
+    public Task SincronizarAgoraAsync(CancellationToken tokenCancelamento = default) =>
+        SincronizarAsync(tokenCancelamento);
+
+    private Task SincronizarEmSegundoPlanoAsync() => SincronizarAsync(CancellationToken.None);
+
+    private async Task SincronizarPeriodicamenteAsync()
+    {
+        while (true)
+        {
+            await Task.Delay(TimeSpan.FromMinutes(5));
+            await SincronizarAsync(CancellationToken.None);
+        }
+    }
+
+    private async Task SincronizarAsync(CancellationToken tokenCancelamento)
     {
         try
         {
-            await sincronizacao.SincronizarAsync();
-            var snapshot = await banco.LerSnapshotAsync();
+            InformarStatus("Sincronizando catálogo...");
+            await sincronizacao.SincronizarAsync(tokenCancelamento);
+            var snapshot = await banco.LerSnapshotAsync(tokenCancelamento);
             if (snapshot is not null)
                 InformarSnapshotAtualizado(snapshot);
-            InformarStatus("Sincronização concluída.");
+            ErroAtualizado?.Invoke(null);
+            InformarStatus(snapshot is null
+                ? "Servidor respondeu sem catálogo."
+                : $"Sincronizado em {snapshot.UltimaSincronizacao.LocalDateTime:g}.");
         }
         catch (Exception excecao)
         {
             RegistrarFalhaSincronizacao(excecao);
-            InformarStatus("Não foi possível sincronizar. Confira o servidor e tente novamente.");
+            ErroAtualizado?.Invoke(excecao);
+            InformarStatus("Não foi possível sincronizar. Mantendo o catálogo local.");
         }
     }
     public void InformarSnapshotAtualizado(SnapshotConfiguracao snapshot)

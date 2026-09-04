@@ -21,6 +21,7 @@ internal static class ConfiguracaoServicos
         servicos.AddSingleton<CatalogoViewModel>();
         servicos.AddSingleton<ServicoPreferenciasCliente>();
         servicos.AddSingleton<ServicoDiagnosticoCliente>();
+        servicos.AddSingleton<ServicoConfiguracaoEndpoint>();
         servicos.AddHttpClient<ServicoFaviconCache>();
         servicos.AddSingleton<IServicoNotificacoes, ServicoNotificacoes>();
         servicos.AddSingleton<IServicoResolucaoRecursos, ServicoResolucaoRecursos>();

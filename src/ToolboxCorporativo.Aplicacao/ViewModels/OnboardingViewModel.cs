@@ -6,6 +6,7 @@ public sealed class OnboardingViewModel : ObservableObject
 {
     private string urlApi = "http://127.0.0.1:8080";
     private string status = "Carregando catálogo local...";
+    private string? erroTecnico;
     private readonly string explicacao =
         "O Toolbox consulta o servidor para receber seu catálogo, identifica sua sessão Windows " +
         "e mantém a última configuração válida no cache local. Nenhuma senha de domínio é solicitada.";
@@ -22,7 +23,16 @@ public sealed class OnboardingViewModel : ObservableObject
         private set => SetProperty(ref status, value);
     }
 
+    public string? ErroTecnico
+    {
+        get => erroTecnico;
+        private set => SetProperty(ref erroTecnico, value);
+    }
+
     public string Explicacao => explicacao;
 
     public void AtualizarStatus(string mensagem) => Status = mensagem;
+
+    public void AtualizarErro(Exception? excecao) =>
+        ErroTecnico = excecao is null ? null : $"{excecao.GetType().Name}: {excecao.Message}";
 }
