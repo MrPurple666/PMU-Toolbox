@@ -21,16 +21,25 @@
         <TextBox Grid.Row="3" Header="Pesquisar recursos" Text="{Binding Catalogo.TextoPesquisa, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,12,0,0" />
         <TextBlock Grid.Row="4" Text="{Binding Onboarding.Status}" TextWrapping="Wrap" Margin="0,8,0,0" />
         <TextBlock Grid.Row="5" Text="{Binding Onboarding.ErroTecnico}" TextWrapping="Wrap" Foreground="IndianRed" Margin="0,4,0,0" />
-        <ListView Grid.Row="6" ItemsSource="{Binding Catalogo.RecursosVisiveis}" IsItemClickEnabled="True" ItemClick="RecursoClick" Margin="0,8,0,0">
+        <ListView Grid.Row="6" ItemsSource="{Binding Catalogo.Categorias}" Margin="0,8,0,0">
             <ListView.Header>
                 <TextBlock Text="{Binding Catalogo.Mensagem}" TextWrapping="Wrap" />
             </ListView.Header>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Padding="8,6">
-                        <TextBlock Text="{Binding Nome}" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding Descricao}" Opacity="0.75" />
-                        <TextBlock Text="{Binding Destino}" Opacity="0.65" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{Binding Nome}" FontWeight="SemiBold" Margin="0,8,0,0" />
+                        <ListView ItemsSource="{Binding Recursos}" IsItemClickEnabled="True" ItemClick="RecursoClick">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Padding="8,6">
+                                        <TextBlock Text="{Binding Nome}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Descricao}" Opacity="0.75" />
+                                        <TextBlock Text="{Binding Destino}" Opacity="0.65" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>

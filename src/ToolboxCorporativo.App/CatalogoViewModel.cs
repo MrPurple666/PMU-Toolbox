@@ -3,6 +3,8 @@ using ToolboxCorporativo.Infraestrutura.Persistencia;
 
 namespace ToolboxCorporativo.App;
 
+public sealed record CategoriaCatalogo(string Nome, IReadOnlyList<RegistroRecursoCache> Recursos);
+
 public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) : ObservableObject
 {
     private readonly HashSet<Guid> favoritos = preferencias.LerFavoritos();
@@ -23,6 +25,7 @@ public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) :
             if (SetProperty(ref textoPesquisa, value))
             {
                 OnPropertyChanged(nameof(RecursosVisiveis));
+                OnPropertyChanged(nameof(Categorias));
                 OnPropertyChanged(nameof(Mensagem));
             }
         }
@@ -33,6 +36,13 @@ public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) :
                 ? "Nenhum recurso disponível. Inicie o servidor e sincronize novamente."
                 : "Nenhum recurso corresponde à pesquisa."
             : $"{RecursosVisiveis.Count} recurso(s) encontrado(s).";
+
+    public IReadOnlyList<CategoriaCatalogo> Categorias =>
+        RecursosVisiveis
+            .GroupBy(recurso => recurso.Tipo.ToString())
+            .OrderBy(grupo => grupo.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(grupo => new CategoriaCatalogo(grupo.Key, grupo.ToArray()))
+            .ToArray();
 
     public IReadOnlyList<RegistroRecursoCache> RecursosVisiveis =>
         string.IsNullOrWhiteSpace(TextoPesquisa)
@@ -48,6 +58,7 @@ public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) :
     {
         Recursos = snapshot.Recursos.Where(recurso => recurso.Ativo).ToArray();
         OnPropertyChanged(nameof(RecursosVisiveis));
+        OnPropertyChanged(nameof(Categorias));
         OnPropertyChanged(nameof(Mensagem));
     }
 
