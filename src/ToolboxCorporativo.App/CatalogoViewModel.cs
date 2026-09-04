@@ -8,6 +8,7 @@ public sealed record CategoriaCatalogo(string Nome, IReadOnlyList<RegistroRecurs
 public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) : ObservableObject
 {
     private readonly HashSet<Guid> favoritos = preferencias.LerFavoritos();
+    private readonly List<Guid> recentes = [];
     private IReadOnlyList<RegistroRecursoCache> recursos = [];
     private string textoPesquisa = string.Empty;
 
@@ -36,6 +37,12 @@ public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) :
                 ? "Nenhum recurso disponível. Inicie o servidor e sincronize novamente."
                 : "Nenhum recurso corresponde à pesquisa."
             : $"{RecursosVisiveis.Count} recurso(s) encontrado(s).";
+
+    public IReadOnlyList<RegistroRecursoCache> Recentes =>
+        recentes.Select(id => Recursos.FirstOrDefault(recurso => recurso.Id == id))
+            .Where(recurso => recurso is not null)
+            .Cast<RegistroRecursoCache>()
+            .ToArray();
 
     public IReadOnlyList<CategoriaCatalogo> Categorias =>
         RecursosVisiveis
@@ -73,6 +80,15 @@ public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) :
 
     public bool EhFavorito(Guid recursoId) => favoritos.Contains(recursoId);
 
+
+    public void RegistrarUso(Guid recursoId)
+    {
+        recentes.Remove(recursoId);
+        recentes.Insert(0, recursoId);
+        if (recentes.Count > 10)
+            recentes.RemoveAt(recentes.Count - 1);
+        OnPropertyChanged(nameof(Recentes));
+    }
     public IReadOnlyList<RegistroRecursoCache> QuickLauncher(string texto, int limite = 10) =>
         Recursos.Where(recurso =>
             recurso.Nome.Contains(texto, StringComparison.OrdinalIgnoreCase) ||

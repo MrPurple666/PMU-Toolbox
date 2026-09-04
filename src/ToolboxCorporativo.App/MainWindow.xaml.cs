@@ -76,6 +76,7 @@ public sealed partial class MainWindow : Window
                 Favoritavel = recurso.Favoritavel,
             }, recurso.Destino);
             Onboarding.AtualizarStatus($"Abrindo {recurso.Nome}.");
+            Catalogo.RegistrarUso(recurso.Id);
         }
         catch (Exception excecao)
         {
