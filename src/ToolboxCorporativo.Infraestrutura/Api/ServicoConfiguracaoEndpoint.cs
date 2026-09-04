@@ -4,12 +4,13 @@ namespace ToolboxCorporativo.Infraestrutura.Api;
 
 public sealed class ServicoConfiguracaoEndpoint
 {
-    private readonly string caminho = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "ToolboxCorporativo", "conexao.json");
+    private readonly string caminho;
 
-    public ServicoConfiguracaoEndpoint()
+    public ServicoConfiguracaoEndpoint(string? caminho = null)
     {
+        this.caminho = caminho ?? Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "ToolboxCorporativo", "conexao.json");
         Endereco = LerEndereco();
     }
 
