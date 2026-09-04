@@ -46,6 +46,8 @@ public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) :
 
     public IReadOnlyList<CategoriaCatalogo> Categorias =>
         RecursosVisiveis
+            .OrderByDescending(recurso => EhFavorito(recurso.Id))
+            .ThenBy(recurso => recurso.Nome, StringComparer.OrdinalIgnoreCase)
             .GroupBy(recurso => recurso.Tipo.ToString())
             .OrderBy(grupo => grupo.Key, StringComparer.OrdinalIgnoreCase)
             .Select(grupo => new CategoriaCatalogo(grupo.Key, grupo.ToArray()))
@@ -68,13 +70,13 @@ public sealed class CatalogoViewModel(ServicoPreferenciasCliente preferencias) :
         OnPropertyChanged(nameof(Categorias));
         OnPropertyChanged(nameof(Mensagem));
     }
-
     public bool AlternarFavorito(Guid recursoId)
     {
         if (!favoritos.Add(recursoId))
             favoritos.Remove(recursoId);
         preferencias.SalvarFavoritos(favoritos);
         OnPropertyChanged(nameof(RecursosVisiveis));
+        OnPropertyChanged(nameof(Categorias));
         return favoritos.Contains(recursoId);
     }
 
