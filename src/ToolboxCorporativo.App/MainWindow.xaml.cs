@@ -83,4 +83,10 @@ public sealed partial class MainWindow : Window
             Onboarding.AtualizarStatus($"Não foi possível abrir {recurso.Nome}.");
         }
     }
+    private void FavoritoClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: Guid id })
+            Catalogo.AlternarFavorito(id);
+    }
+
 }
